@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databases>
+
+	<db provider="mysql">
+		<ip>localhost</ip>
+		<port>3306</port>
+		<user>root</user>
+		<pass>1234</pass>
+		<name>carbuss</name>
+	</db>
+		
+	<db provider="mysql">
+		<ip>localhost</ip>
+		<port>3306</port>
+		<user>root</user>
+		<pass>1234</pass>
+		<name>sunat</name>
+	</db>
+		
+</databases>
