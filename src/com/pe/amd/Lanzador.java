@@ -25,6 +25,7 @@ import com.pe.amd.modelo.db.ConnectionFactory;
 public class Lanzador implements Runnable{
 	
 	public static boolean cerrar = false;
+	public static boolean parar = false, respaldo = false;
 	
 	//@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
@@ -53,7 +54,7 @@ public class Lanzador implements Runnable{
 			System.err.println(e1.getMessage());
 			e1.printStackTrace();
 		}
-		System.out.println("Fecha Actual: " + new Date().toString());
+		System.out.println("Fecha Actual: " + new Date(/*2017-1900,5,12*/).toString());
 		
 		//HORA DEL ENVIO DE DOCUMENTOS
 		String hora = "19:00";
@@ -85,16 +86,51 @@ public class Lanzador implements Runnable{
 		
 		System.out.println("\n\n-------------------\nLa hora para el envio del Resumen sera: " + hora + "\n\n");
 		System.out.println("Iniciando la generacion y migracion de documentos....\n");
+		
+		
 		//INICIO DEL SERVICIO 
+		Object[] respuesta;
 		do {
-			try {
-				programa.migrarFacturas(new Date(), false);
-				programa.migrarBoletas(new Date(), false);
-				programa.generarFacturas(new Date());
-				programa.generarFacturas(new Date());
-			}catch(Exception e) {} 
+			if(!Lanzador.parar) {
+				try {
+					
+					programa.migrarFacturas(new Date(), false);
+					programa.migrarBoletas(new Date(), false);
+					
+					
+					respuesta = programa.generarFacturas(new Date());
+					Lanzador.parar |= !((Boolean)respuesta[1]).booleanValue();
+					respuesta = programa.generarBoletas(new Date());
+					Lanzador.parar |= !((Boolean)respuesta[1]).booleanValue();
+					
+					/*
+					programa.migrarFacturas(new Date(2017-1900,5,12), false);
+					programa.migrarBoletas(new Date(2017-1900,5,12), false);
+					
+					
+					respuesta = programa.generarFacturas(new Date(2017-1900,5,12));
+					Lanzador.parar |= !((Boolean)respuesta[1]).booleanValue();
+					respuesta = programa.generarBoletas(new Date(2017-1900,5,12));
+					Lanzador.parar |= !((Boolean)respuesta[1]).booleanValue();
+					*/
+					System.gc();
+					
+					Lanzador.parar = Lanzador.respaldo;
+					
+					if(Lanzador.parar) 
+						System.out.println("El programa se ha detenido... start para iniciarlo");
+					
+				}catch(Exception e) {
+					System.err.println(e.getMessage());
+					Lanzador.parar = true;
+					if(Lanzador.parar) 
+						System.out.println("El programa se ha detenido... escriba start para iniciarlo");
+				} 
+			}
 			calendar = new GregorianCalendar();
+			//calendar.setTime(new Date(2017-1900,5,12));
 			System.gc();
+			
 			if(Lanzador.cerrar) {
 				programa.close();
 				System.exit(0);
@@ -143,8 +179,27 @@ public class Lanzador implements Runnable{
 	public void run() {
 		System.out.println("Escriba exit para salir: ");
 		Scanner scanner = new Scanner(System.in);
-		while(!scanner.nextLine().trim().equalsIgnoreCase("exit")) {}
-		Lanzador.cerrar = true;
+		String ingreso;
+		boolean exit = false;
+		while( !exit ) {
+			ingreso = scanner.nextLine().trim();
+			if(ingreso.equalsIgnoreCase("exit")) {
+				Lanzador.cerrar = true;
+				exit = true;
+			}
+			else if(ingreso.equalsIgnoreCase("start")) {
+
+				Lanzador.parar = false;
+				Lanzador.respaldo = false;
+				System.out.println("START :: INVOCADO");
+			}
+			else if(ingreso.equalsIgnoreCase("stop")) {
+				Lanzador.parar = true;
+				Lanzador.respaldo = true;
+				System.out.println("STOP :: INVOCADO");
+				
+			}
+		}
 		scanner.close();
 	}
 }

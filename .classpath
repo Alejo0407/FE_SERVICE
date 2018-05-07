@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="lib/primefaces-6.1.jar"/>
 	<classpathentry kind="lib" path="lib/sqljdbc4-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/fe_modelo.jar"/>
+	<classpathentry kind="lib" path="lib/jfxrt.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
